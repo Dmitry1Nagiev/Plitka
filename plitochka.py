@@ -21,9 +21,9 @@ of_image = pygame.transform.scale(of_image_,(100,100))
 of_image.set_colorkey(WHITE)
 
 p_1_image_ = pygame.image.load('player_1.png').convert_alpha()
-p_1_image = pygame.transform.scale(p_1_image_,(90,90))
+p_1_image = pygame.transform.scale(p_1_image_,(80,80))
 p_2_image_ = pygame.image.load('p_2.jpg').convert_alpha()
-p_2_image = pygame.transform.scale(p_2_image_,(130,130))
+p_2_image = pygame.transform.scale(p_2_image_,(80,80))
 p_2_image.set_colorkey(WHITE)
 
 maps_list = [
@@ -57,6 +57,7 @@ class Plitka(pygame.sprite.Sprite):
             if self.on:
                 if self.rect.left<pos[0]<self.rect.right and self.rect.top<pos[1]<self.rect.bottom:
                     list_player[NUM_HOD].step = True
+
 def drawmaps():
     for i in range(0,7):
         for j in range(0,7):
@@ -76,6 +77,10 @@ class Player(pygame.sprite.Sprite):
         self.hod = False
         self.step = False
         self.name = name
+
+
+
+
     def update(self):
         global NUM_HOD
         if self.hod:
@@ -85,20 +90,25 @@ class Player(pygame.sprite.Sprite):
                     NUM_HOD = 0
                     list_player[NUM_HOD].hod = True
                 list_player.remove(self)
+
                 self.kill()
+                return
             if pygame.mouse.get_pressed()[0]:
                 if self.step:
                     click_pos = pygame.mouse.get_pos()
-                    if ((click_pos[0] - self.rect.center[0])**2 + (click_pos[1]-self.rect.center[0])**2)**0.5<=150:
-                        self.rect.x = 10+click_pos[0]//100+100
-                        self.rect.y = 10+click_pos[1]//100+100
+                    if ((click_pos[0] - self.rect.center[0])**2 + (click_pos[1]-self.rect.center[1])**2)**0.5<=150:
+                        self.rect.x = 10+click_pos[0]//100*100
+                        self.rect.y = 10+click_pos[1]//100*100
                         self.step = False
                         NUM_HOD += 1
                         if NUM_HOD > len(list_player) - 1 :
                             NUM_HOD = 0
-                            list_player[NUM_HOD].hod = True
+                        list_player[NUM_HOD].hod = True
     def proverka(self):
-        pl = pygame.sprite.spritecollide(self,plitka_group,False)[0]
+        pl_c = pygame.sprite.spritecollide(self,plitka_group,False)
+        if not pl_c:
+            return False
+        pl = pl_c[0]
         x = pl.adr[1]
         y = pl.adr[0]
         list_hod = []
@@ -106,7 +116,7 @@ class Player(pygame.sprite.Sprite):
             for j in (-1,0,1):
                 index_y = y+i
                 index_x = x+j
-                if -1 < index_x < 7 and -1 < index_y < 7:
+                if 0 <= index_x < 7 and 0 <= index_y < 7:
                     if maps_list[index_y][index_x] == 0:
                         list_hod.append(True)
         return True in list_hod
@@ -122,7 +132,7 @@ def game():
     else:
         text = f'Ход игрока - {list_player[NUM_HOD].name}'
     text_render = font.render(text, 'red', True)
-    screen.blit(text_render, (WIDHT//2-180,HEIGHT//2))
+    screen.blit(text_render, (WIDHT-280,HEIGHT-680))
 
 plitka_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
@@ -137,7 +147,7 @@ running = True
 player_1 = Player(p_1_image,10,10,'Dmitry')
 player_group.add(player_1)
 list_player.append(player_1)
-player_2 = Player(p_2_image, 590, 590,'Pelmenhu')
+player_2 = Player(p_2_image, 610, 610,'Pelmenhu')
 player_group.add(player_2)
 list_player.append(player_2)
 list_player[0].hod = True
